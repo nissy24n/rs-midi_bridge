@@ -1,0 +1,16 @@
+{
+  "name": "serial_midi_bridge",
+  "version": "0.0.1",
+  "description": "",
+  "main": "rs-midi.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "nobu24",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "serialport": "^11.0.0",
+    "webmidi": "^3.1.6"
+  }
+}
