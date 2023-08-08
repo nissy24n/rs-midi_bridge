@@ -1,4 +1,4 @@
-// Serial port MIDI Bridge
+// Serial port MIDI Bridge v0.0.2
 
 'use strict';
 
@@ -71,8 +71,9 @@ function sendMIDI(midiOut, message) {
 }
 
 function serialMIDIbridge(portName, midiOut) {
-  let array = [];
-  let time = new Date().getTime();
+  let st = 0;
+  let len = 0;
+  let mes = [];
 
   const sp = new SerialPort({
     path: portName,
@@ -86,13 +87,65 @@ function serialMIDIbridge(portName, midiOut) {
   const parser = sp.pipe(new ByteLengthParser({length:1}));
 
   parser.on('data', (data)=>{
-    if (new Date().getTime() - time > 1000) {
-      array = [];
+    if (data[0] & 0b10000000) {
+      if ((data[0] & 0b11111000) == 0b11111000) {
+        sendMIDI(midiOut, [data[0]]);
+        return;
+      }
+      if (st == 0xf0 && mes.length > 0) {
+        mes.push(0xf7);
+        sendMIDI(midiOut, mes);
+        if (data[0] == 0xf7) {
+          mes = [];
+          return;
+        }
+      }
+      st = data[0];
+      mes = [st];
+    } else {
+      if (st && mes.length == 0) {
+        mes = [st];
+      }
+      mes.push(data[0]);
     }
-    time = new Date().getTime();
-    array.push(data[0]);
-    if (sendMIDI(midiOut, array)) {
-      array = [];
+
+    switch (mes[0] & 0b11110000) {
+      case 0x80:
+      case 0x90:
+      case 0xa0:
+      case 0xb0:
+      case 0xe0:
+        len = 2;
+        break;
+      case 0xc0:
+      case 0xd0:
+        len = 1;
+        break;
+      case 0xf0:
+        if (mes[0] == 0xf0) {
+          len = -1;
+        } else
+        if ((mes[0] & 0b00001000) == 0) {
+          if (mes[0] == 0xf1 || mes[0] == 0xf3) {
+            len = 1;
+          } else
+          if (mes[0] == 0xf2) {
+            len = 2;
+          } else {
+            len = 0;
+          }
+        } else {
+          len = 0;
+        }
+        break;
+      default:
+        len = 0;
+        break;
+    }
+
+    if (mes.length == len + 1) {
+      sendMIDI(midiOut, mes);
+      mes = [];
     }
   });
 }
