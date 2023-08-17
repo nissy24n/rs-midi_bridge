@@ -1,4 +1,4 @@
-# Serial port MIDI Bridge
+# Serial port MIDI Bridge v0.0.3
 
 ## 概要
 シリアルポートから受信したMIDI信号をMIDIポートへ出力するプログラムです。  
@@ -21,11 +21,17 @@ https://nodejs.org/ja
 ~~~
 実行結果（例）
 ~~~
-rs-midi <Serial port Name> <MIDI OUT No.>
+Serial port MIDI Bridge v0.0.3 by nobu24
+
+usage:
+  node rs-midi [options] <Serial port Name> <MIDI OUT No.>
+
+options:
+  -D<delay time>        Delay time (ms)
 
 MIDI OUT list:
-[0] Microsoft GS Wavetable Synth
-[1] SoundCanvasVA
+  [0] Microsoft GS Wavetable Synth
+  [1] SoundCanvasVA
 ~~~
 
 受信するシリアルポート名とMIDI OUT listに表示されたポートの番号を指定して実行します。  
@@ -37,9 +43,19 @@ MIDI OUT list:
 ~~~
 Serial port: COM3
 MIDI OUT   : SoundCanvasVA
+Delay time : 0 ms
 Ready!
 ~~~
 シリアルポートから受信したMIDI信号をMIDI OUTへ出力します。  
+
+## オプション
+下記のオプションを指定することができます。  
+
+-D\<Delay time\>  指定時間(ミリ秒)遅延して演奏します。  
+（例）150ミリ秒遅延させる場合
+~~~
+> node rs-midi -D150 COM3 1
+~~~
 
 ## 仕様
 ・シリアルポートの通信は、下記固定です。  
@@ -50,6 +66,10 @@ Ready!
 　[WEBMIDI.js](https://webmidijs.org/)  
 
 ## リリースノート
+
+### 0.0.3
+
+遅延演奏オプション(-D)を追加
 
 ### 0.0.2
 

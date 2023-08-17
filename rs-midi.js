@@ -1,5 +1,3 @@
-// Serial port MIDI Bridge v0.0.2
-
 'use strict';
 
 const { WebMidi } = require("webmidi");
@@ -7,6 +5,7 @@ const { SerialPort } = require('serialport');
 const { ByteLengthParser } = require('@serialport/parser-byte-length');
 
 let argv;
+let delay = 0;
 
 if (require.main === module) {
   main({ argv: process.argv })
@@ -29,13 +28,17 @@ function main(options) {
 
 function onUsage() {
   // Usage
-  console.log("rs-midi <Serial port Name> <MIDI OUT No.>\n");
+  console.log("Serial port MIDI Bridge v0.0.3 by nobu24\n");
+  console.log("usage:");
+  console.log("  node rs-midi [options] <Serial port Name> <MIDI OUT No.>\n");
+  console.log("options:");
+  console.log("  -D<delay time>\tDelay time (ms)\n");
 
   // Outputs
   console.log("MIDI OUT list:");
   let i = 0;
   WebMidi.outputs.forEach((output)=>{
-    console.log("[" + i + "]", output.name);
+    console.log("  [" + i + "]", output.name);
     i++;
   });
 
@@ -43,8 +46,16 @@ function onUsage() {
 }
 
 function onEnabled() {
-  const portName = argv[2];
-  const midiOut  = argv[3];
+  let st = 2;
+
+  // Options
+  if (argv[st].match(/^-D[0-9]+/g)) {
+    delay = parseInt(argv[st].slice(2));
+    st++;
+  }
+
+  const portName = argv[st];
+  const midiOut  = argv[st + 1];
 
   // Serial
   console.log("Serial port:", portName);
@@ -55,6 +66,9 @@ function onEnabled() {
 
   // Output
   console.log("MIDI OUT   :", WebMidi.outputs[midiOut].name);
+
+  // Delay
+  console.log("Delay time :", delay, "ms");
 
   // Bridge
   console.log('Ready!');
@@ -89,12 +103,20 @@ function serialMIDIbridge(portName, midiOut) {
   parser.on('data', (data)=>{
     if (data[0] & 0b10000000) {
       if ((data[0] & 0b11111000) == 0b11111000) {
-        sendMIDI(midiOut, [data[0]]);
+        if (delay == 0) {
+          sendMIDI(midiOut, [data[0]]);
+        } else {
+          setTimeout(sendMIDI, delay, midiOut, [data[0]]);
+        }
         return;
       }
       if (st == 0xf0 && mes.length > 0) {
         mes.push(0xf7);
-        sendMIDI(midiOut, mes);
+        if (delay == 0) {
+          sendMIDI(midiOut, mes);
+        } else {
+          setTimeout(sendMIDI, delay, midiOut, mes);
+        }
         if (data[0] == 0xf7) {
           mes = [];
           return;
@@ -144,7 +166,11 @@ function serialMIDIbridge(portName, midiOut) {
     }
 
     if (mes.length == len + 1) {
-      sendMIDI(midiOut, mes);
+      if (delay == 0) {
+        sendMIDI(midiOut, mes);
+      } else {
+        setTimeout(sendMIDI, delay, midiOut, mes);
+      }
       mes = [];
     }
   });
