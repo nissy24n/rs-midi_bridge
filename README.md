@@ -1,4 +1,4 @@
-# Serial port MIDI Bridge v0.0.4
+# Serial port MIDI Bridge v0.0.5
 
 ## 概要
 シリアルポートから受信したMIDI信号をMIDIポートへ出力するプログラムです。  
@@ -21,7 +21,7 @@ https://nodejs.org/ja
 ~~~
 実行結果（例）
 ~~~
-Serial port MIDI Bridge v0.0.4 by nobu24
+Serial port MIDI Bridge v0.0.5 by nobu24
 
 usage:
   node rs-midi [options] <Serial port Name> <MIDI OUT No.>
@@ -30,6 +30,7 @@ options:
   -D<delay time> Delay time (ms)
   -LCD           LCD enable
   -GS            GS Reset
+  -CM-64         CM-64 Map Mode
 
 Serial port list:
   [COM3] USB Serial Port (COM3)
@@ -38,13 +39,14 @@ Serial port list:
 
 MIDI OUT list:
   [0] Microsoft GS Wavetable Synth
-  [1] SoundCanvasVA
+  [1] 2- UM-ONE
+  [2] SoundCanvasVA
 ~~~
 
 受信するシリアルポート名とMIDI OUT listに表示されたポートの番号を指定して実行します。  
-（例）シリアルポート[COM3]から受信して、MIDI OUT listの[1]に出力する場合
+（例）シリアルポート[COM3]から受信して、MIDI OUT listの[2]に出力する場合
 ~~~
-> node rs-midi COM3 1
+> node rs-midi COM3 2
 ~~~
 シリアルポート名とMIDI OUT名が表示され、Ready!と表示されれば準備完了です。  
 ~~~
@@ -71,6 +73,10 @@ Roland SC-55などのLCD表示エクスクルーシブ・メッセージの表�
 -GS  
 起動時にGSリセットを送信します。  
 
+-CM-64  
+起動時にSOUND Canvas VAをCM-64の音色配列に設定します。  
+このオプションで起動した場合、エクスクルーシブ・データとバンク・セレクトを受信しても、MIDIポートには送信しません。  
+
 ## 仕様
 ・シリアルポートの通信は、下記固定です。  
 　31250bps/ビット長8ビット/パリティなし/ストップビット1ビット/フロー制御無し  
@@ -83,6 +89,10 @@ Roland SC-55などのLCD表示エクスクルーシブ・メッセージの表�
 　DSD TECH SH-U09B（CP2102Nチップ）  
 
 ## リリースノート
+
+### 0.0.5
+
+CM-64 Map Modeオプション(-CM-64)を追加  
 
 ### 0.0.4
 
